@@ -1,0 +1,94 @@
+
+Jayasri Kumaravel <jayasrikumaravel21@gmail.com>
+18:47 (1 minute ago)
+to kjayasri2112
+
+import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
+
+class QuizQuestion {
+    String question;
+    List<String> options;
+    int correctOptionIndex;
+
+    public QuizQuestion(String question, List<String> options, int correctOptionIndex) {
+        this.question = question;
+        this.options = options;
+        this.correctOptionIndex = correctOptionIndex;
+    }
+}
+
+class Quiz {
+    List<QuizQuestion> quizQuestions;
+    int userScore;
+    Timer timer;
+    Scanner scanner;
+
+    public Quiz(List<QuizQuestion> quizQuestions) {
+        this.quizQuestions = quizQuestions;
+        this.userScore = 0;
+        this.timer = new Timer();
+        this.scanner = new Scanner(System.in);
+    }
+
+    public void start() {
+        quizQuestions.forEach(this::askQuestion);
+        endQuiz();
+    }
+
+    private void askQuestion(QuizQuestion question) {
+        System.out.println(question.question);
+        question.options.forEach(option -> System.out.println((question.options.indexOf(option) + 1) + ". " + option));
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("\nTime's up! Moving to the next question.");
+            }
+        };
+
+        timer.schedule(task, 15000);
+
+        int userChoice;
+        while (true) {
+            try {
+                userChoice = Integer.parseInt(scanner.nextLine());
+                if (userChoice < 1 || userChoice > question.options.size()) {
+                    System.out.println("Invalid choice. Please enter a number between 1 and " + question.options.size());
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        }
+
+        task.cancel(); // Cancel the task before checking the answer
+
+        if (userChoice == question.correctOptionIndex + 1) {
+            System.out.println("Correct!\n");
+            userScore++;
+        } else {
+            System.out.println("Incorrect! The correct answer was option " + (question.correctOptionIndex + 1) + ".\n");
+        }
+    }
+
+    private void endQuiz() {
+        System.out.println("Quiz completed!");
+        System.out.println("Your final score: " + userScore + "/" + quizQuestions.size());
+        scanner.close();
+    }
+}
+
+class QuizApp {
+    public static void main(String[] args) {
+        List<QuizQuestion> quizQuestions = Arrays.asList(
+                new QuizQuestion("What is the capital of France?", Arrays.asList("Berlin", "Paris", "London"), 1),
+                new QuizQuestion("Which planet is known as the Red Planet?", Arrays.asList("Mars", "Venus", "Jupiter"), 0)
+        );
+
+        Quiz quiz = new Quiz(quizQuestions);
+        quiz.start();
+    }
+}
